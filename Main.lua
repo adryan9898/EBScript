@@ -1,16 +1,12 @@
--- Message.lua
+-- Message.lua v2
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService   = game:GetService("UserInputService")
+local StarterGui        = game:GetService("StarterGui")
+local UserInputService  = game:GetService("UserInputService")
 
--- Variável de controle de visibilidade
-local guiVisible = true
-
--- Cria o ScreenGui
-local screenGui = Instance.new("ScreenGui")
+-- Tela e frame
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
 screenGui.Name = "MessageScript"
-screenGui.Parent = game.CoreGui
 
--- Frame principal
 local frame = Instance.new("Frame", screenGui)
 frame.Name = "MainFrame"
 frame.Size = UDim2.new(0.3, 0, 0.25, 0)
@@ -22,7 +18,6 @@ frame.Draggable = true
 
 -- Título
 local title = Instance.new("TextLabel", frame)
-title.Name = "Title"
 title.Size = UDim2.new(1,0,0.2,0)
 title.Position = UDim2.new(0,0,0,0)
 title.BackgroundTransparency = 1
@@ -56,27 +51,38 @@ btn.TextColor3 = Color3.new(1,1,1)
 btn.BackgroundColor3 = Color3.fromRGB(0,120,215)
 btn.BorderSizePixel = 0
 
--- Alterna visibilidade com ALT
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
+-- Visibilidade
+local visible = true
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
     if input.KeyCode == Enum.KeyCode.LeftAlt then
-        guiVisible = not guiVisible
-        frame.Visible = guiVisible
+        visible = not visible
+        frame.Visible = visible
     end
 end)
 
--- Função de envio
-local function sendMsg(msg)
-    local chatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
-    local evt = chatEvents:WaitForChild("SayMessageRequest")
-    evt:FireServer(msg, "All")
+-- Tenta encontrar o RemoteEvent de chat
+local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+local sayReq
+if chatEvents then
+    sayReq = chatEvents:FindFirstChild("SayMessageRequest")
 end
 
--- Clique no botão
+local function sendMsg(msg)
+    if sayReq then
+        sayReq:FireServer(msg, "All")
+        warn("[Message.lua] Usando SayMessageRequest =>", msg)
+    else
+        StarterGui:SetCore("ChatMakeSystemMessage",{ Text = msg, Color = Color3.new(1,1,1) })
+        warn("[Message.lua] Fallback SetCore ChatMakeSystemMessage =>", msg)
+    end
+end
+
+-- Clique
 btn.MouseButton1Click:Connect(function()
-    local text = box.Text
-    if text and text:match("%S") then
-        sendMsg(text)
+    local txt = box.Text
+    if txt:match("%S") then
+        sendMsg(txt)
         box.Text = ""
     end
 end)
