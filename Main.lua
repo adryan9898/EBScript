@@ -1,3 +1,4 @@
+-- Funções e variáveis globais
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -30,13 +31,12 @@ local function numberToWords(n)
     end
 end
 
--- Variáveis para controlar visibilidade e interrupção
+-- Variáveis para controle da interface
 local guiVisible = true
 local running = false
-local connection
 local logs = {}
 
--- Criação da Interface
+-- Criação da interface
 local screenGui = Instance.new("ScreenGui", game.CoreGui)
 screenGui.Name = "EBNumberMenu"
 
@@ -56,6 +56,7 @@ title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.SourceSansBold
 title.TextScaled = true
 
+-- Caixa de entrada para o número inicial
 local startBox = Instance.new("TextBox", frame)
 startBox.PlaceholderText = "Número Inicial"
 startBox.Size = UDim2.new(0.8, 0, 0.2, 0)
@@ -64,6 +65,7 @@ startBox.Text = ""
 startBox.Font = Enum.Font.SourceSans
 startBox.TextScaled = true
 
+-- Caixa de entrada para o número final
 local endBox = Instance.new("TextBox", frame)
 endBox.PlaceholderText = "Número Final"
 endBox.Size = UDim2.new(0.8, 0, 0.2, 0)
@@ -72,6 +74,7 @@ endBox.Text = ""
 endBox.Font = Enum.Font.SourceSans
 endBox.TextScaled = true
 
+-- Botão de iniciar
 local playButton = Instance.new("TextButton", frame)
 playButton.Text = "COMEÇAR"
 playButton.Size = UDim2.new(0.4, 0, 0.15, 0)
@@ -82,6 +85,7 @@ playButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
 playButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 playButton.BorderSizePixel = 0
 
+-- Botão de parar
 local stopButton = Instance.new("TextButton", frame)
 stopButton.Text = "PARAR"
 stopButton.Size = UDim2.new(0.4, 0, 0.15, 0)
@@ -92,5 +96,66 @@ stopButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 stopButton.BorderSizePixel = 0
 
+-- Frame para logs
 local logFrame = Instance.new("Frame", screenGui)
-logFrame.Size = UDim2.new(0.3, 0, 0
+logFrame.Size = UDim2.new(0.3, 0, 0.3, 0)
+logFrame.Position = UDim2.new(0.7, 0, 0.3, 0)
+logFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+logFrame.BorderSizePixel = 0
+logFrame.Visible = false
+
+-- Label para exibir logs
+local logText = Instance.new("TextLabel", logFrame)
+logText.Text = "Logs"
+logText.Size = UDim2.new(1, 0, 1, 0)
+logText.BackgroundTransparency = 1
+logText.TextColor3 = Color3.fromRGB(255, 255, 255)
+logText.Font = Enum.Font.SourceSans
+logText.TextScaled = true
+logText.TextWrap = true
+
+-- Função para enviar mensagens para o chat
+local function sendMessage(message)
+    local ChatService = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+    local event = ChatService:WaitForChild("SayMessageRequest")
+    event:FireServer(message, "All")
+    
+    -- Adicionar a mensagem nos logs
+    table.insert(logs, message)
+    logText.Text = "Logs:\n" .. table.concat(logs, "\n")
+end
+
+-- Função para alternar a visibilidade da interface
+local function toggleVisibility()
+    guiVisible = not guiVisible
+    screenGui.Enabled = guiVisible
+end
+
+-- Conectar tecla Alt para alternar a interface
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftAlt then
+        toggleVisibility()
+    end
+end)
+
+-- Função para iniciar o envio de números
+playButton.MouseButton1Click:Connect(function()
+    if running then return end
+    running = true
+    local startNum = tonumber(startBox.Text) or 0
+    local endNum = tonumber(endBox.Text) or 100000
+    if endNum > 100000 then
+        endNum = 100000
+    end
+    for i = startNum, endNum do
+        if not running then break end
+        sendMessage(numberToWords(i))
+        task.wait(1.5)
+    end
+    running = false
+end)
+
+-- Função para parar o envio
+stopButton.MouseButton1Click:Connect(function()
+    running = false
+end)
