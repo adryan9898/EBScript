@@ -19,7 +19,7 @@ local function numberToWords(n)
                    "SETENTA E DOIS", "SETENTA E TRÊS", "SETENTA E QUATRO", "SETENTA E CINCO", "SETENTA E SEIS", 
                    "SETENTA E SETE", "SETENTA E OITO", "SETENTA E Nove", "OITENTA", "OITENTA E UM", 
                    "OITENTA E DOIS", "OITENTA E TRÊS", "OITENTA E QUATRO", "OITENTA E CINCO", "OITENTA E SEIS", 
-                   "OITENTA E SETE", "OITENTA E OITO", "OITENTA E Nove", "NOVENTA", "NOVENTA E UM", 
+                   "OITENTA E SETE", "OITENTA E OITO", "OITENTA E NOVE", "NOVENTA", "NOVENTA E UM", 
                    "NOVENTA E DOIS", "NOVENTA E TRÊS", "NOVENTA E QUATRO", "NOVENTA E CINCO", "NOVENTA E SEIS", 
                    "NOVENTA E SETE", "NOVENTA E OITO", "NOVENTA E NOVE", "CEM", "CEM MIL"}
 
@@ -34,6 +34,7 @@ end
 local guiVisible = true
 local running = false
 local connection
+local logs = {}
 
 -- Criação da Interface
 local screenGui = Instance.new("ScreenGui", game.CoreGui)
@@ -91,6 +92,21 @@ stopButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 stopButton.BorderSizePixel = 0
 
+local logFrame = Instance.new("Frame", screenGui)
+logFrame.Size = UDim2.new(0.3, 0, 0.2, 0)
+logFrame.Position = UDim2.new(0.7, 0, 0.3, 0)
+logFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+logFrame.BorderSizePixel = 0
+logFrame.Visible = false
+
+local logText = Instance.new("TextLabel", logFrame)
+logText.Text = "Logs"
+logText.Size = UDim2.new(1, 0, 1, 0)
+logText.BackgroundTransparency = 1
+logText.TextColor3 = Color3.fromRGB(255, 255, 255)
+logText.Font = Enum.Font.SourceSans
+logText.TextScaled = true
+
 local function toggleVisibility()
     guiVisible = not guiVisible
     screenGui.Enabled = guiVisible
@@ -107,6 +123,10 @@ local function sendMessage(message)
     local ChatService = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
     local event = ChatService:WaitForChild("SayMessageRequest")
     event:FireServer(message, "All")
+    
+    -- Adicionar a mensagem nos logs
+    table.insert(logs, message)
+    logText.Text = "Logs:\n" .. table.concat(logs, "\n")
 end
 
 playButton.MouseButton1Click:Connect(function()
