@@ -21,7 +21,7 @@ local function numberToWords(n)
                    "OITENTA E DOIS", "OITENTA E TRÊS", "OITENTA E QUATRO", "OITENTA E CINCO", "OITENTA E SEIS", 
                    "OITENTA E SETE", "OITENTA E OITO", "OITENTA E NOVE", "NOVENTA", "NOVENTA E UM", 
                    "NOVENTA E DOIS", "NOVENTA E TRÊS", "NOVENTA E QUATRO", "NOVENTA E CINCO", "NOVENTA E SEIS", 
-                   "NOVENTA E SETE", "NOVENTA E OITO", "NOVENTA E NOVE", "CEM", "CEM MIL"}
+                   "NOVENTA E SETE", "NOVENTA E OITO", "NOVENTA E Nove", "CEM", "CEM MIL"}
 
     if n <= 100000 then
         return words[n + 1] .. " !"
@@ -93,58 +93,4 @@ stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 stopButton.BorderSizePixel = 0
 
 local logFrame = Instance.new("Frame", screenGui)
-logFrame.Size = UDim2.new(0.3, 0, 0.2, 0)
-logFrame.Position = UDim2.new(0.7, 0, 0.3, 0)
-logFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-logFrame.BorderSizePixel = 0
-logFrame.Visible = false
-
-local logText = Instance.new("TextLabel", logFrame)
-logText.Text = "Logs"
-logText.Size = UDim2.new(1, 0, 1, 0)
-logText.BackgroundTransparency = 1
-logText.TextColor3 = Color3.fromRGB(255, 255, 255)
-logText.Font = Enum.Font.SourceSans
-logText.TextScaled = true
-
-local function toggleVisibility()
-    guiVisible = not guiVisible
-    screenGui.Enabled = guiVisible
-end
-
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftAlt then
-        toggleVisibility()
-    end
-end)
-
--- Função para enviar mensagens para o chat
-local function sendMessage(message)
-    local ChatService = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-    local event = ChatService:WaitForChild("SayMessageRequest")
-    event:FireServer(message, "All")
-    
-    -- Adicionar a mensagem nos logs
-    table.insert(logs, message)
-    logText.Text = "Logs:\n" .. table.concat(logs, "\n")
-end
-
-playButton.MouseButton1Click:Connect(function()
-    if running then return end
-    running = true
-    local startNum = tonumber(startBox.Text) or 0
-    local endNum = tonumber(endBox.Text) or 100000
-    if endNum > 100000 then
-        endNum = 100000
-    end
-    for i = startNum, endNum do
-        if not running then break end
-        sendMessage(numberToWords(i))
-        task.wait(1.5)
-    end
-    running = false
-end)
-
-stopButton.MouseButton1Click:Connect(function()
-    running = false
-end)
+logFrame.Size = UDim2.new(0.3, 0, 0
