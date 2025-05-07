@@ -4,13 +4,35 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Função para converter números em palavras
 local function numberToWords(n)
-    local words = {"ZERO", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE", "DEZ"}
-    if n <= 10 then return words[n + 1] .. " !" end
-    return tostring(n) .. " !" 
+    local words = {"ZERO", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE", "DEZ", 
+                   "ONZE", "DOZE", "TREZE", "QUATORZE", "QUINZE", "DEZESSEIS", "DEZESSETE", "DEZOITO", "DEZENOVE", 
+                   "VINTE", "VINTE E UM", "VINTE E DOIS", "VINTE E TRÊS", "VINTE E QUATRO", "VINTE E CINCO", 
+                   "VINTE E SEIS", "VINTE E SETE", "VINTE E OITO", "VINTE E NOVE", "TRINTA", "TRINTA E UM", 
+                   "TRINTA E DOIS", "TRINTA E TRÊS", "TRINTA E QUATRO", "TRINTA E CINCO", "TRINTA E SEIS", 
+                   "TRINTA E SETE", "TRINTA E OITO", "TRINTA E NOVE", "QUARENTA", "QUARENTA E UM", "QUARENTA E DOIS", 
+                   "QUARENTA E TRÊS", "QUARENTA E QUATRO", "QUARENTA E CINCO", "QUARENTA E SEIS", "QUARENTA E SETE", 
+                   "QUARENTA E OITO", "QUARENTA E NOVE", "CINQUENTA", "CINQUENTA E UM", "CINQUENTA E DOIS", 
+                   "CINQUENTA E TRÊS", "CINQUENTA E QUATRO", "CINQUENTA E CINCO", "CINQUENTA E SEIS", 
+                   "CINQUENTA E SETE", "CINQUENTA E OITO", "CINQUENTA E NOVE", "SESSENTA", "SESSENTA E UM", 
+                   "SESSENTA E DOIS", "SESSENTA E TRÊS", "SESSENTA E QUATRO", "SESSENTA E CINCO", "SESSENTA E SEIS", 
+                   "SESSENTA E SETE", "SESSENTA E OITO", "SESSENTA E NOVE", "SETENTA", "SETENTA E UM", 
+                   "SETENTA E DOIS", "SETENTA E TRÊS", "SETENTA E QUATRO", "SETENTA E CINCO", "SETENTA E SEIS", 
+                   "SETENTA E SETE", "SETENTA E OITO", "SETENTA E NOVE", "OITENTA", "OITENTA E UM", 
+                   "OITENTA E DOIS", "OITENTA E TRÊS", "OITENTA E QUATRO", "OITENTA E CINCO", "OITENTA E SEIS", 
+                   "OITENTA E SETE", "OITENTA E OITO", "OITENTA E NOVE", "NOVENTA", "NOVENTA E UM", 
+                   "NOVENTA E DOIS", "NOVENTA E TRÊS", "NOVENTA E QUATRO", "NOVENTA E CINCO", "NOVENTA E SEIS", 
+                   "NOVENTA E SETE", "NOVENTA E OITO", "NOVENTA E NOVE", "CEM"}
+    if n <= 100 then 
+        return words[n + 1] .. " !" 
+    else
+        return tostring(n) .. " !" 
+    end
 end
 
--- Variável para controlar visibilidade
+-- Variáveis para controlar visibilidade e interrupção
 local guiVisible = true
+local running = false
+local connection
 
 -- Criação da Interface
 local screenGui = Instance.new("ScreenGui", game.CoreGui)
@@ -32,13 +54,6 @@ title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.SourceSansBold
 title.TextScaled = true
 
-local configButton = Instance.new("TextButton", frame)
-configButton.Text = "⚙️"
-configButton.Size = UDim2.new(0.1, 0, 0.15, 0)
-configButton.Position = UDim2.new(0.9, 0, 0, 0)
-configButton.BackgroundTransparency = 1
-configButton.TextScaled = true
-
 local startBox = Instance.new("TextBox", frame)
 startBox.PlaceholderText = "Número Inicial"
 startBox.Size = UDim2.new(0.8, 0, 0.2, 0)
@@ -57,13 +72,23 @@ endBox.TextScaled = true
 
 local playButton = Instance.new("TextButton", frame)
 playButton.Text = "COMEÇAR"
-playButton.Size = UDim2.new(0.8, 0, 0.15, 0)
+playButton.Size = UDim2.new(0.4, 0, 0.15, 0)
 playButton.Position = UDim2.new(0.1, 0, 0.8, 0)
 playButton.Font = Enum.Font.SourceSansBold
 playButton.TextScaled = true
 playButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
 playButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 playButton.BorderSizePixel = 0
+
+local stopButton = Instance.new("TextButton", frame)
+stopButton.Text = "PARAR"
+stopButton.Size = UDim2.new(0.4, 0, 0.15, 0)
+stopButton.Position = UDim2.new(0.5, 0, 0.8, 0)
+stopButton.Font = Enum.Font.SourceSansBold
+stopButton.TextScaled = true
+stopButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopButton.BorderSizePixel = 0
 
 local function toggleVisibility()
     guiVisible = not guiVisible
@@ -77,31 +102,20 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 playButton.MouseButton1Click:Connect(function()
+    if running then return end
+    running = true
     local startNum = tonumber(startBox.Text) or 0
-    local endNum = tonumber(endBox.Text) or 10
+    local endNum = tonumber(endBox.Text) or 100
     for i = startNum, endNum do
+        if not running then break end
         ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
         :WaitForChild("SayMessageRequest")
         :FireServer(numberToWords(i), "All")
         task.wait(1.5)
     end
+    running = false
 end)
 
--- Menu de Configuração
-local configFrame = Instance.new("Frame", frame)
-configFrame.Size = UDim2.new(1, 0, 0.3, 0)
-configFrame.Position = UDim2.new(0, 0, 1, 0)
-configFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-configFrame.Visible = false
-
-local configLabel = Instance.new("TextLabel", configFrame)
-configLabel.Text = "Configurações"
-configLabel.Size = UDim2.new(1, 0, 0.3, 0)
-configLabel.BackgroundTransparency = 1
-configLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-configLabel.Font = Enum.Font.SourceSansBold
-configLabel.TextScaled = true
-
-configButton.MouseButton1Click:Connect(function()
-    configFrame.Visible = not configFrame.Visible
+stopButton.MouseButton1Click:Connect(function()
+    running = false
 end)
