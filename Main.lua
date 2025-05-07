@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
--- Função para converter números em palavras
+-- Função para converter números em palavras (para até 100.000)
 local function numberToWords(n)
     local words = {"ZERO", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE", "DEZ", 
                    "ONZE", "DOZE", "TREZE", "QUATORZE", "QUINZE", "DEZESSEIS", "DEZESSETE", "DEZOITO", "DEZENOVE", 
@@ -11,21 +11,22 @@ local function numberToWords(n)
                    "TRINTA E DOIS", "TRINTA E TRÊS", "TRINTA E QUATRO", "TRINTA E CINCO", "TRINTA E SEIS", 
                    "TRINTA E SETE", "TRINTA E OITO", "TRINTA E NOVE", "QUARENTA", "QUARENTA E UM", "QUARENTA E DOIS", 
                    "QUARENTA E TRÊS", "QUARENTA E QUATRO", "QUARENTA E CINCO", "QUARENTA E SEIS", "QUARENTA E SETE", 
-                   "QUARENTA E OITO", "QUARENTA E NOVE", "CINQUENTA", "CINQUENTA E UM", "CINQUENTA E DOIS", 
+                   "QUARENTA E OITO", "QUARENTA E Nove", "CINQUENTA", "CINQUENTA E UM", "CINQUENTA E DOIS", 
                    "CINQUENTA E TRÊS", "CINQUENTA E QUATRO", "CINQUENTA E CINCO", "CINQUENTA E SEIS", 
                    "CINQUENTA E SETE", "CINQUENTA E OITO", "CINQUENTA E NOVE", "SESSENTA", "SESSENTA E UM", 
                    "SESSENTA E DOIS", "SESSENTA E TRÊS", "SESSENTA E QUATRO", "SESSENTA E CINCO", "SESSENTA E SEIS", 
-                   "SESSENTA E SETE", "SESSENTA E OITO", "SESSENTA E NOVE", "SETENTA", "SETENTA E UM", 
+                   "SESSENTA E SETE", "SESSENTA E OITO", "SESSENTA E Nove", "SETENTA", "SETENTA E UM", 
                    "SETENTA E DOIS", "SETENTA E TRÊS", "SETENTA E QUATRO", "SETENTA E CINCO", "SETENTA E SEIS", 
-                   "SETENTA E SETE", "SETENTA E OITO", "SETENTA E NOVE", "OITENTA", "OITENTA E UM", 
+                   "SETENTA E SETE", "SETENTA E OITO", "SETENTA E Nove", "OITENTA", "OITENTA E UM", 
                    "OITENTA E DOIS", "OITENTA E TRÊS", "OITENTA E QUATRO", "OITENTA E CINCO", "OITENTA E SEIS", 
-                   "OITENTA E SETE", "OITENTA E OITO", "OITENTA E NOVE", "NOVENTA", "NOVENTA E UM", 
+                   "OITENTA E SETE", "OITENTA E OITO", "OITENTA E Nove", "NOVENTA", "NOVENTA E UM", 
                    "NOVENTA E DOIS", "NOVENTA E TRÊS", "NOVENTA E QUATRO", "NOVENTA E CINCO", "NOVENTA E SEIS", 
-                   "NOVENTA E SETE", "NOVENTA E OITO", "NOVENTA E NOVE", "CEM"}
-    if n <= 100 then 
-        return words[n + 1] .. " !" 
+                   "NOVENTA E SETE", "NOVENTA E OITO", "NOVENTA E NOVE", "CEM", "CEM MIL"}
+
+    if n <= 100000 then
+        return words[n + 1] .. " !"
     else
-        return tostring(n) .. " !" 
+        return tostring(n) .. " !"
     end
 end
 
@@ -105,7 +106,10 @@ playButton.MouseButton1Click:Connect(function()
     if running then return end
     running = true
     local startNum = tonumber(startBox.Text) or 0
-    local endNum = tonumber(endBox.Text) or 100
+    local endNum = tonumber(endBox.Text) or 100000
+    if endNum > 100000 then
+        endNum = 100000
+    end
     for i = startNum, endNum do
         if not running then break end
         ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
