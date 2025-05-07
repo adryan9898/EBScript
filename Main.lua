@@ -102,6 +102,13 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
+-- Função para enviar mensagens para o chat
+local function sendMessage(message)
+    local ChatService = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+    local event = ChatService:WaitForChild("SayMessageRequest")
+    event:FireServer(message, "All")
+end
+
 playButton.MouseButton1Click:Connect(function()
     if running then return end
     running = true
@@ -112,9 +119,7 @@ playButton.MouseButton1Click:Connect(function()
     end
     for i = startNum, endNum do
         if not running then break end
-        ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
-        :WaitForChild("SayMessageRequest")
-        :FireServer(numberToWords(i), "All")
+        sendMessage(numberToWords(i))
         task.wait(1.5)
     end
     running = false
