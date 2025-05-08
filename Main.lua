@@ -1,125 +1,128 @@
---// Contador de JJs - Script do Adry
-local max_count = 1000
-local count = 0
+--// Contador de Números - Script do Adry
 local ui_open = true
 local dragging = false
 local offset = Vector2.new()
 local running = false
+local count = 0
+local max_count = 0
 
 --// Criando a interface
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local Progress = Instance.new("TextLabel")
-local StartStopButton = Instance.new("TextButton")
+local ProgressLabel = Instance.new("TextLabel")
+local StartInput = Instance.new("TextBox")
+local EndInput = Instance.new("TextBox")
+local DelayInput = Instance.new("TextBox")
+local StartButton = Instance.new("TextButton")
+local CloseButton = Instance.new("TextButton")
+local Subtitle = Instance.new("TextLabel")
 
-ScreenGui.Name = "AdryJJCounter"
+ScreenGui.Name = "AdryCounterUI"
 ScreenGui.Parent = game:GetService("CoreGui")
 
 Frame.Name = "MainFrame"
 Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Frame.BorderSizePixel = 0
-Frame.Size = UDim2.new(0, 300, 0, 150)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+Frame.Size = UDim2.new(0, 300, 0, 400)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
 Frame.Active = true
 Frame.Draggable = false
+Frame.BackgroundTransparency = 0.05
 
 Title.Name = "Title"
 Title.Parent = Frame
-Title.Text = "Script do Adry"
-Title.Size = UDim2.new(1, 0, 0.2, 0)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "Contador de Números"
+Title.Size = UDim2.new(1, 0, 0.15, 0)
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
 Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 20
+Title.TextSize = 24
 Title.BorderSizePixel = 0
 
-Progress.Name = "Progress"
-Progress.Parent = Frame
-Progress.Text = "Aguardando..."
-Progress.Size = UDim2.new(1, 0, 0.4, 0)
-Progress.Position = UDim2.new(0, 0, 0.2, 0)
-Progress.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Progress.TextColor3 = Color3.fromRGB(255, 255, 255)
-Progress.Font = Enum.Font.SourceSans
-Progress.TextSize = 18
-Progress.BorderSizePixel = 0
+Subtitle.Name = "Subtitle"
+Subtitle.Parent = Frame
+Subtitle.Text = "Insira os números e pressione Começar"
+Subtitle.Size = UDim2.new(1, 0, 0.1, 0)
+Subtitle.Position = UDim2.new(0, 0, 0.15, 0)
+Subtitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Subtitle.TextColor3 = Color3.fromRGB(100, 100, 100)
+Subtitle.Font = Enum.Font.SourceSans
+Subtitle.TextSize = 18
+Subtitle.BorderSizePixel = 0
 
-StartStopButton.Name = "StartStopButton"
-StartStopButton.Parent = Frame
-StartStopButton.Text = "Começar"
-StartStopButton.Size = UDim2.new(1, -20, 0.3, 0)
-StartStopButton.Position = UDim2.new(0, 10, 0.6, 0)
-StartStopButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-StartStopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-StartStopButton.Font = Enum.Font.SourceSansBold
-StartStopButton.TextSize = 18
-StartStopButton.BorderSizePixel = 0
+ProgressLabel.Name = "ProgressLabel"
+ProgressLabel.Parent = Frame
+ProgressLabel.Text = ""
+ProgressLabel.Size = UDim2.new(1, 0, 0.15, 0)
+ProgressLabel.Position = UDim2.new(0, 0, 0.25, 0)
+ProgressLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ProgressLabel.TextColor3 = Color3.fromRGB(0, 170, 0)
+ProgressLabel.Font = Enum.Font.SourceSansBold
+ProgressLabel.TextSize = 22
+ProgressLabel.BorderSizePixel = 0
 
---// Numeros por extenso
-local numeros = {"ZERO", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE", "DEZ"}
-for i = 11, max_count do
-    table.insert(numeros, tostring(i))
-end
+StartInput.Name = "StartInput"
+StartInput.Parent = Frame
+StartInput.PlaceholderText = "Número inicial"
+StartInput.Text = "1"
+StartInput.Size = UDim2.new(0.8, 0, 0.15, 0)
+StartInput.Position = UDim2.new(0.1, 0, 0.4, 0)
+StartInput.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+StartInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+StartInput.Font = Enum.Font.SourceSans
+StartInput.TextSize = 18
+StartInput.BorderSizePixel = 0
 
---// Função para enviar mensagens
-local function enviarMensagem(mensagem)
-    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-    :WaitForChild("SayMessageRequest")
-    :FireServer(mensagem, "All")
-end
+EndInput.Name = "EndInput"
+EndInput.Parent = Frame
+EndInput.PlaceholderText = "Número final"
+EndInput.Text = "50"
+EndInput.Size = UDim2.new(0.8, 0, 0.15, 0)
+EndInput.Position = UDim2.new(0.1, 0, 0.55, 0)
+EndInput.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+EndInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+EndInput.Font = Enum.Font.SourceSans
+EndInput.TextSize = 18
+EndInput.BorderSizePixel = 0
 
---// Controle do botão
-StartStopButton.MouseButton1Click:Connect(function()
-    if running then
-        running = false
-        StartStopButton.Text = "Começar"
-        Progress.Text = "Pausado em: " .. numeros[count] .. " !"
-    else
-        running = true
-        StartStopButton.Text = "Parar"
-        spawn(function()
-            while running and count < max_count do
-                count += 1
-                local mensagem = numeros[count] .. " !"
-                enviarMensagem(mensagem)
-                Progress.Text = mensagem .. " - " .. count .. " de " .. max_count
-                task.wait(0.5) -- Ajuste a velocidade aqui
-            end
-            if count >= max_count then
-                running = false
-                StartStopButton.Text = "Começar"
-                Progress.Text = "Concluído!"
-            end
-        end)
-    end
-end)
+DelayInput.Name = "DelayInput"
+DelayInput.Parent = Frame
+DelayInput.PlaceholderText = "Tempo entre números (s)"
+DelayInput.Text = "1"
+DelayInput.Size = UDim2.new(0.8, 0, 0.15, 0)
+DelayInput.Position = UDim2.new(0.1, 0, 0.7, 0)
+DelayInput.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+DelayInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+DelayInput.Font = Enum.Font.SourceSans
+DelayInput.TextSize = 18
+DelayInput.BorderSizePixel = 0
 
---// Controle de movimento do menu
-Frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        offset = Frame.Position - UDim2.fromOffset(input.Position.X, input.Position.Y)
-    end
-end)
+StartButton.Name = "StartButton"
+StartButton.Parent = Frame
+StartButton.Text = "Começar"
+StartButton.Size = UDim2.new(0.8, 0, 0.15, 0)
+StartButton.Position = UDim2.new(0.1, 0, 0.85, 0)
+StartButton.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
+StartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+StartButton.Font = Enum.Font.SourceSansBold
+StartButton.TextSize = 20
+StartButton.BorderSizePixel = 0
+StartButton.AutoButtonColor = true
 
-Frame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = Frame
+CloseButton.Text = "✖"
+CloseButton.Size = UDim2.new(0.1, 0, 0.15, 0)
+CloseButton.Position = UDim2.new(0.9, -10, 0, 0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextSize = 20
+CloseButton.BorderSizePixel = 0
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        Frame.Position = UDim2.fromOffset(input.Position.X, input.Position.Y) + offset
-    end
-end)
-
---// Controle de visibilidade com Alt
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftAlt then
-        ui_open = not ui_open
-        Frame.Visible = ui_open
-    end
+--// Funções do botão fechar
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
 end)
