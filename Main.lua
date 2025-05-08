@@ -1,10 +1,20 @@
 --// Contador de Números - Script do Adry
-local ui_open = true
+local ui_open = false
 local dragging = false
 local offset = Vector2.new()
 local running = false
 local count = 0
 local max_count = 0
+
+--// Tabela para converter números para texto
+local number_words = {
+    [0] = "ZERO !", [1] = "UM !", [2] = "DOIS !", [3] = "TRÊS !", [4] = "QUATRO !", [5] = "CINCO !",
+    [6] = "SEIS !", [7] = "SETE !", [8] = "OITO !", [9] = "NOVE !", [10] = "DEZ !"
+}
+
+for i = 11, 800 do
+    number_words[i] = tostring(i) .. " !"
+end
 
 --// Criando a interface
 local ScreenGui = Instance.new("ScreenGui")
@@ -17,6 +27,7 @@ local DelayInput = Instance.new("TextBox")
 local StartButton = Instance.new("TextButton")
 local CloseButton = Instance.new("TextButton")
 local Subtitle = Instance.new("TextLabel")
+local ToggleButton = Instance.new("TextButton")
 
 ScreenGui.Name = "AdryCounterUI"
 ScreenGui.Parent = game:GetService("CoreGui")
@@ -30,6 +41,7 @@ Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
 Frame.Active = true
 Frame.Draggable = false
 Frame.BackgroundTransparency = 0.05
+Frame.Visible = false
 
 Title.Name = "Title"
 Title.Parent = Frame
@@ -99,30 +111,22 @@ DelayInput.Font = Enum.Font.SourceSans
 DelayInput.TextSize = 18
 DelayInput.BorderSizePixel = 0
 
-StartButton.Name = "StartButton"
-StartButton.Parent = Frame
-StartButton.Text = "Começar"
-StartButton.Size = UDim2.new(0.8, 0, 0.15, 0)
-StartButton.Position = UDim2.new(0.1, 0, 0.85, 0)
-StartButton.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
-StartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-StartButton.Font = Enum.Font.SourceSansBold
-StartButton.TextSize = 20
-StartButton.BorderSizePixel = 0
-StartButton.AutoButtonColor = true
+StartButton.MouseButton1Click:Connect(function()
+    if running then return end
+    local start_num = tonumber(StartInput.Text) or 1
+    local end_num = tonumber(EndInput.Text) or 50
+    local delay_time = tonumber(DelayInput.Text) or 1
+    running = true
+    for i = start_num, end_num do
+        if not running then break end
+        ProgressLabel.Text = "Contando: " .. i .. " de " .. end_num
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(number_words[i], "All")
+        task.wait(delay_time)
+    end
+    running = false
+    ProgressLabel.Text = ""
+end)
 
-CloseButton.Name = "CloseButton"
-CloseButton.Parent = Frame
-CloseButton.Text = "✖"
-CloseButton.Size = UDim2.new(0.1, 0, 0.15, 0)
-CloseButton.Position = UDim2.new(0.9, -10, 0, 0)
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.TextSize = 20
-CloseButton.BorderSizePixel = 0
-
---// Funções do botão fechar
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+ToggleButton.MouseButton1Click:Connect(function()
+    Frame.Visible = not Frame.Visible
 end)
