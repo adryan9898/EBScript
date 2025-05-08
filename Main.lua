@@ -50,11 +50,21 @@ for i = 11, max_count do
     table.insert(numeros, tostring(i))
 end
 
---// Atualizando a contagem
-game:GetService("RunService").RenderStepped:Connect(function()
-    if count < max_count then
+--// Função para enviar mensagens
+local function enviarMensagem(mensagem)
+    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+    :WaitForChild("SayMessageRequest")
+    :FireServer(mensagem, "All")
+end
+
+--// Iniciar contagem
+spawn(function()
+    while count < max_count do
         count += 1
-        Progress.Text = numeros[count + 1] .. " ! - " .. count .. " de " .. max_count
+        local mensagem = numeros[count] .. " !"
+        enviarMensagem(mensagem)
+        Progress.Text = mensagem .. " - " .. count .. " de " .. max_count
+        task.wait(0.5) -- Ajuste o intervalo se necessário
     end
 end)
 
