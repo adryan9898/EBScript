@@ -1,88 +1,87 @@
--- Message.lua v2
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui        = game:GetService("StarterGui")
-local UserInputService  = game:GetService("UserInputService")
+--// Contador de JJs - Script do Adry
+local max_count = 1000
+local count = 0
+local ui_open = true
+local dragging = false
+local offset = Vector2.new()
 
--- Tela e frame
-local screenGui = Instance.new("ScreenGui", game.CoreGui)
-screenGui.Name = "MessageScript"
+--// Criando a interface
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Progress = Instance.new("TextLabel")
 
-local frame = Instance.new("Frame", screenGui)
-frame.Name = "MainFrame"
-frame.Size = UDim2.new(0.3, 0, 0.25, 0)
-frame.Position = UDim2.new(0.35, 0, 0.4, 0)
-frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
+ScreenGui.Name = "AdryJJCounter"
+ScreenGui.Parent = game:GetService("CoreGui")
 
--- Título
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0.2,0)
-title.Position = UDim2.new(0,0,0,0)
-title.BackgroundTransparency = 1
-title.Text = "Script do Adry - Msg"
-title.Font = Enum.Font.SourceSansBold
-title.TextScaled = true
-title.TextColor3 = Color3.new(1,1,1)
+Frame.Name = "MainFrame"
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Size = UDim2.new(0, 250, 0, 120)
+Frame.Position = UDim2.new(0.5, -125, 0.5, -60)
+Frame.Active = true
+Frame.Draggable = false
 
--- Caixa de texto
-local box = Instance.new("TextBox", frame)
-box.Name = "MsgBox"
-box.Size = UDim2.new(0.9,0,0.4,0)
-box.Position = UDim2.new(0.05,0,0.25,0)
-box.PlaceholderText = "Digite a mensagem aqui"
-box.ClearTextOnFocus = false
-box.TextScaled = true
-box.Font = Enum.Font.SourceSans
-box.TextColor3 = Color3.new(1,1,1)
-box.BackgroundColor3 = Color3.fromRGB(40,40,40)
-box.BorderSizePixel = 0
+Title.Name = "Title"
+Title.Parent = Frame
+Title.Text = "Script do Adry"
+Title.Size = UDim2.new(1, 0, 0.3, 0)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 20
+Title.BorderSizePixel = 0
 
--- Botão de enviar
-local btn = Instance.new("TextButton", frame)
-btn.Name = "SendButton"
-btn.Size = UDim2.new(0.9,0,0.25,0)
-btn.Position = UDim2.new(0.05,0,0.7,0)
-btn.Text = "ENVIAR MENSAGEM"
-btn.Font = Enum.Font.SourceSansBold
-btn.TextScaled = true
-btn.TextColor3 = Color3.new(1,1,1)
-btn.BackgroundColor3 = Color3.fromRGB(0,120,215)
-btn.BorderSizePixel = 0
+Progress.Name = "Progress"
+Progress.Parent = Frame
+Progress.Text = "ZERO! - 0 de " .. max_count
+Progress.Size = UDim2.new(1, 0, 0.7, 0)
+Progress.Position = UDim2.new(0, 0, 0.3, 0)
+Progress.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Progress.TextColor3 = Color3.fromRGB(255, 255, 255)
+Progress.Font = Enum.Font.SourceSans
+Progress.TextSize = 18
+Progress.BorderSizePixel = 0
 
--- Visibilidade
-local visible = true
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.LeftAlt then
-        visible = not visible
-        frame.Visible = visible
+--// Numeros por extenso
+local numeros = {"ZERO", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE", "DEZ"}
+for i = 11, max_count do
+    table.insert(numeros, tostring(i))
+end
+
+--// Atualizando a contagem
+game:GetService("RunService").RenderStepped:Connect(function()
+    if count < max_count then
+        count += 1
+        Progress.Text = numeros[count + 1] .. " ! - " .. count .. " de " .. max_count
     end
 end)
 
--- Tenta encontrar o RemoteEvent de chat
-local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
-local sayReq
-if chatEvents then
-    sayReq = chatEvents:FindFirstChild("SayMessageRequest")
-end
-
-local function sendMsg(msg)
-    if sayReq then
-        sayReq:FireServer(msg, "All")
-        warn("[Message.lua] Usando SayMessageRequest =>", msg)
-    else
-        StarterGui:SetCore("ChatMakeSystemMessage",{ Text = msg, Color = Color3.new(1,1,1) })
-        warn("[Message.lua] Fallback SetCore ChatMakeSystemMessage =>", msg)
+--// Controle de movimento do menu
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        offset = Frame.Position - UDim2.fromOffset(input.Position.X, input.Position.Y)
     end
-end
+end)
 
--- Clique
-btn.MouseButton1Click:Connect(function()
-    local txt = box.Text
-    if txt:match("%S") then
-        sendMsg(txt)
-        box.Text = ""
+Frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        Frame.Position = UDim2.fromOffset(input.Position.X, input.Position.Y) + offset
+    end
+end)
+
+--// Controle de visibilidade com Alt
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftAlt then
+        ui_open = not ui_open
+        Frame.Visible = ui_open
     end
 end)
