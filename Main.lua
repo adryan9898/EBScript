@@ -1,11 +1,17 @@
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
+-- OpenAI API Config
+local OPENAI_API_KEY = "YOUR_API_KEY"
+local OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 
 -- Interface Settings
 local menuOpen = false
 local isClimbing = false
 local isRunning = false
-local climbSpeed = 0.15
+local climbSpeed = 0.1
 
 -- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -14,9 +20,9 @@ screenGui.Parent = game.CoreGui
 
 -- Create Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 200, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -100, 0.5, -175)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.Size = UDim2.new(0, 300, 0, 500)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -250)
+mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.Parent = screenGui
@@ -49,89 +55,96 @@ end)
 
 -- Add Title Label
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 50)
-titleLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Size = UDim2.new(1, 0, 0, 60)
+titleLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextSize = 20
-titleLabel.Text = "Script do Adry"
+titleLabel.TextSize = 24
+titleLabel.Text = "⚙️ Script do Adry"
 titleLabel.Parent = mainFrame
 
 -- Add Tower Climb Button
 local climbButton = Instance.new("TextButton")
-climbButton.Size = UDim2.new(0.8, 0, 0, 40)
-climbButton.Position = UDim2.new(0.1, 0, 0, 60)
-climbButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+climbButton.Size = UDim2.new(0.8, 0, 0, 50)
+climbButton.Position = UDim2.new(0.1, 0, 0, 80)
+climbButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 climbButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 climbButton.Font = Enum.Font.SourceSansBold
-climbButton.TextSize = 18
-climbButton.Text = "1: Função Subir Torre (Ativar)"
+climbButton.TextSize = 20
+climbButton.Text = "🗼 Subir Torre (Ativar)"
 climbButton.Parent = mainFrame
 
 climbButton.MouseButton1Click:Connect(function()
     isClimbing = not isClimbing
     if isClimbing then
-        climbButton.Text = "1: Função Subir Torre (Parar)"
+        climbButton.Text = "🛑 Parar Torre"
     else
-        climbButton.Text = "1: Função Subir Torre (Ativar)"
+        climbButton.Text = "🗼 Subir Torre (Ativar)"
     end
 end)
 
 -- Add Infinite Run Button
 local runButton = Instance.new("TextButton")
-runButton.Size = UDim2.new(0.8, 0, 0, 40)
-runButton.Position = UDim2.new(0.1, 0, 0, 120)
-runButton.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+runButton.Size = UDim2.new(0.8, 0, 0, 50)
+runButton.Position = UDim2.new(0.1, 0, 0, 150)
+runButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 runButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 runButton.Font = Enum.Font.SourceSansBold
-runButton.TextSize = 18
-runButton.Text = "2: Função Correr Infinito (Ativar)"
+runButton.TextSize = 20
+runButton.Text = "🏃‍♂️ Correr Infinito (Ativar)"
 runButton.Parent = mainFrame
 
 runButton.MouseButton1Click:Connect(function()
     isRunning = not isRunning
     if isRunning then
-        runButton.Text = "2: Função Correr Infinito (Parar)"
+        runButton.Text = "🛑 Parar Corrida"
     else
-        runButton.Text = "2: Função Correr Infinito (Ativar)"
+        runButton.Text = "🏃‍♂️ Correr Infinito (Ativar)"
     end
 end)
 
--- Climb Function
-RunService.Heartbeat:Connect(function()
-    if isClimbing then
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid:Move(Vector3.new(1, 0, 0))
-            task.wait(climbSpeed)
-            humanoid:Move(Vector3.new(-1, 0, 0))
-        end
-    end
-end)
+-- Add AI Chat Button
+local aiButton = Instance.new("TextButton")
+aiButton.Size = UDim2.new(0.8, 0, 0, 50)
+aiButton.Position = UDim2.new(0.1, 0, 0, 220)
+aiButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+aiButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+aiButton.Font = Enum.Font.SourceSansBold
+aiButton.TextSize = 20
+aiButton.Text = "🤖 Inteligência Artificial"
+aiButton.Parent = mainFrame
 
--- Infinite Run Function
-UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftShift and isRunning then
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = 50
-        end
-    end
-end)
+local aiFrame = Instance.new("Frame")
+aiFrame.Size = UDim2.new(0.9, 0, 0, 200)
+aiFrame.Position = UDim2.new(0.05, 0, 0, 280)
+aiFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+aiFrame.BorderSizePixel = 0
+aiFrame.Visible = false
+aiFrame.Parent = mainFrame
 
-UIS.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftShift and isRunning then
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = 16
-        end
-    end
+local aiTextBox = Instance.new("TextBox")
+aiTextBox.Size = UDim2.new(1, -10, 0, 100)
+aiTextBox.Position = UDim2.new(0, 5, 0, 5)
+aiTextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+aiTextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+aiTextBox.Font = Enum.Font.SourceSansBold
+aiTextBox.TextSize = 18
+aiTextBox.Text = "Digite sua pergunta..."
+aiTextBox.Parent = aiFrame
+
+local aiResponse = Instance.new("TextLabel")
+aiResponse.Size = UDim2.new(1, -10, 0, 85)
+aiResponse.Position = UDim2.new(0, 5, 0, 115)
+aiResponse.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+aiResponse.TextColor3 = Color3.fromRGB(0, 0, 0)
+aiResponse.Font = Enum.Font.SourceSansBold
+aiResponse.TextSize = 16
+aiResponse.Text = "Responda aqui..."
+aiResponse.TextWrapped = true
+aiResponse.Parent = aiFrame
+
+aiButton.MouseButton1Click:Connect(function()
+    aiFrame.Visible = not aiFrame.Visible
 end)
 
 -- Toggle Menu Visibility with Alt
