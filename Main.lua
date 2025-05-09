@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
 -- OpenAI API Config
-local OPENAI_API_KEY = "YOUR_API_KEY"
+local OPENAI_API_KEY = "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"
 local OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 
 -- Interface Settings
