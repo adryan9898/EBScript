@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 -- Interface Settings
 local menuOpen = false
 local isClimbing = false
+local isRunning = false
 local climbSpeed = 0.15
 
 -- Create ScreenGui
@@ -13,8 +14,8 @@ screenGui.Parent = game.CoreGui
 
 -- Create Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 200, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
+mainFrame.Size = UDim2.new(0, 200, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -175)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
@@ -76,6 +77,26 @@ climbButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Add Infinite Run Button
+local runButton = Instance.new("TextButton")
+runButton.Size = UDim2.new(0.8, 0, 0, 40)
+runButton.Position = UDim2.new(0.1, 0, 0, 120)
+runButton.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+runButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+runButton.Font = Enum.Font.SourceSansBold
+runButton.TextSize = 18
+runButton.Text = "2: Função Correr Infinito (Ativar)"
+runButton.Parent = mainFrame
+
+runButton.MouseButton1Click:Connect(function()
+    isRunning = not isRunning
+    if isRunning then
+        runButton.Text = "2: Função Correr Infinito (Parar)"
+    else
+        runButton.Text = "2: Função Correr Infinito (Ativar)"
+    end
+end)
+
 -- Climb Function
 RunService.Heartbeat:Connect(function()
     if isClimbing then
@@ -86,6 +107,29 @@ RunService.Heartbeat:Connect(function()
             humanoid:Move(Vector3.new(1, 0, 0))
             task.wait(climbSpeed)
             humanoid:Move(Vector3.new(-1, 0, 0))
+        end
+    end
+end)
+
+-- Infinite Run Function
+UIS.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftShift and isRunning then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 50
+        end
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftShift and isRunning then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 16
         end
     end
 end)
